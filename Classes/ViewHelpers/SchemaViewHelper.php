@@ -39,6 +39,10 @@ class SchemaViewHelper extends AbstractViewHelper
 
         $event = $this->arguments['event'];
 
+        if (!$event) {
+            return '';
+        }
+
         if ($event->getEventDates()) {
             foreach ($event->getEventDates() as $eventDate) {
                 $schemaEvents[] = [

@@ -21,14 +21,24 @@
 </f:section>
 
 <f:section name="price_categorized">
-    <f:if condition="{priceCategory.bestPrice} < {priceCategory.price}">
-        <f:then>
-            <f:render section="special-price" arguments="{price: priceCategory.price, specialPrice: priceCategory.bestSpecialPrice}"/>
-        </f:then>
-        <f:else>
-            <f:render section="regular-price" arguments="{price: priceCategory.price}"/>
-        </f:else>
-    </f:if>
+    <ul class="price-categories">
+        <f:for each="{eventDate.priceCategories}" as="priceCategory">
+            <f:if condition="{priceCategory.available}">
+                <li class="price-category" data-uid="priceCategory-{priceCategory.uid}">
+                    <span class="price-category-title">{priceCategory.title}</span>
+                    <f:if condition="{priceCategory.bestPrice} &lt; {priceCategory.price}">
+                        <f:then>
+                            <span class="price-category-special"><cart:format.currency currencyTranslation="{currencyTranslationData.currencyTranslation}" currencySign="{currencyTranslationData.currencySign}">{priceCategory.bestPrice}</cart:format.currency></span>
+                            <span class="price-category-regular">bisher: <cart:format.currency currencyTranslation="{currencyTranslationData.currencyTranslation}" currencySign="{currencyTranslationData.currencySign}">{priceCategory.price}</cart:format.currency></span>
+                        </f:then>
+                        <f:else>
+                            <span class="price-category-regular"><cart:format.currency currencyTranslation="{currencyTranslationData.currencyTranslation}" currencySign="{currencyTranslationData.currencySign}">{priceCategory.price}</cart:format.currency></span>
+                        </f:else>
+                    </f:if>
+                </li>
+            </f:if>
+        </f:for>
+    </ul>
 </f:section>
 
 <f:section name="price">
@@ -45,7 +55,7 @@
 <f:if condition="{eventDate.bookable}">
     <f:if condition="{eventDate.priceCategorized}">
         <f:then>
-            <f:render section="price_categorized" arguments="{priceCategory: eventDate.firstAvailablePriceCategory}" />
+            <f:render section="price_categorized" arguments="{eventDate: eventDate}" />
         </f:then>
         <f:else>
             <f:render section="price" arguments="{eventDate: eventDate}" />

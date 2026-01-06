@@ -55,10 +55,13 @@ class DatamapDataHandlerHook
                     1,
                     $pageId,
                     1,
-                    'The record "%s" couldn\'t be saved due to disallowed value(s).',
+                    'The record "%s" (list_type="%s") couldn\'t be saved on page uid %d (doktype %d) due to disallowed value(s).',
                     23,
                     [
                         $incomingFieldArray[$GLOBALS['TCA']['tt_content']['ctrl']['label']],
+                        $incomingFieldArray['list_type'],
+                        $pageId,
+                        $page['doktype'],
                     ]
                 );
             }
@@ -89,13 +92,17 @@ class DatamapDataHandlerHook
         if (empty($listType) || !str_starts_with((string)$listType, 'cartevents_')) {
             return true;
         }
-        if (($doktype == 186) && ($listType === 'cartevents_singleevent')) {
-            return true;
-        }
-        if (($doktype != 186) && ($listType === 'cartevents_events' || $listType === 'cartevents_eventdates' || $listType === 'cartevents_teaserevents')) {
-            return true;
+        // SingleEvent is only allowed on doktype 186
+        if ($listType === 'cartevents_singleevent') {
+            return $doktype == 186;
         }
 
-        return false;
+        // For doktype 186 all other cartevents_* plugins are not allowed
+        if ($doktype == 186) {
+            return false;
+        }
+
+        // All other cartevents_* plugins are allowed on non-186 pages
+        return true;
     }
 }

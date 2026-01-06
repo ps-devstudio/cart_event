@@ -147,6 +147,9 @@ class Event extends AbstractEntity
 
     public function getImages(): ?ObjectStorage
     {
+        if (!isset($this->images)) {
+            $this->images = new ObjectStorage();
+        }
         return $this->images;
     }
 
@@ -166,6 +169,9 @@ class Event extends AbstractEntity
 
     public function getFiles(): ?ObjectStorage
     {
+        if (!isset($this->files)) {
+            $this->files = new ObjectStorage();
+        }
         return $this->files;
     }
 
@@ -179,6 +185,9 @@ class Event extends AbstractEntity
      */
     public function getEventDates(): ?ObjectStorage
     {
+        if (!isset($this->eventDates)) {
+            $this->eventDates = new ObjectStorage();
+        }
         return $this->eventDates;
     }
 
@@ -210,6 +219,9 @@ class Event extends AbstractEntity
      */
     public function getRelatedEvents(): ?ObjectStorage
     {
+        if (!isset($this->relatedEvents)) {
+            $this->relatedEvents = new ObjectStorage();
+        }
         return $this->relatedEvents;
     }
 

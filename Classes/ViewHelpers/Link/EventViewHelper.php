@@ -91,12 +91,23 @@ class EventViewHelper extends AbstractTagBasedViewHelper
 
         $event = $this->arguments['event'];
 
+        if (!$event) {
+            // No event provided — nothing to link to, render children unchanged
+            return $this->renderChildren();
+        }
+
         $page = $this->getEventPage($event);
 
         if ($page) {
-            $pluginName = 'SingleEvent';
+            // Use SingleEvent only for doktype 186 pages; otherwise use ShowEvent
+            $pluginName = ((int)$page['doktype'] === 186) ? 'SingleEvent' : 'ShowEvent';
 
             $this->arguments['pageUid'] = $page['uid'];
+            // Ensure local variable is updated so UriBuilder receives the correct target page uid
+            $pageUid = (int)$page['uid'];
+            // Ensure event parameter and action are set so the link targets the specific event
+            $action = 'show';
+            $this->arguments['arguments']['event'] = $event->getUid();
         } else {
             $pluginName = 'ShowEvent';
 
@@ -113,7 +124,8 @@ class EventViewHelper extends AbstractTagBasedViewHelper
             }
 
             $action = 'show';
-            $this->arguments['arguments']['event'] = $event;
+            // Pass UID (int) as argument so UriBuilder emits it as GET parameter
+            $this->arguments['arguments']['event'] = $event->getUid();
         }
 
         $parameters = $this->arguments['arguments'];
@@ -148,11 +160,15 @@ class EventViewHelper extends AbstractTagBasedViewHelper
     }
 
     /**
-     * @param Event $event
+     * @param Event|null $event
      * @return array|bool
      */
-    protected function getEventPage(Event $event)
+    protected function getEventPage(?Event $event)
     {
+        if (!$event) {
+            return false;
+        }
+
         $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable('pages');
         return $queryBuilder->select('*')
             ->from('pages')

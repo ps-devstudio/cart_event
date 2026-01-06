@@ -21,13 +21,26 @@
             <f:then>
                 <input class="form-control" type="text" value="1" name="tx_cart_cart[quantity]">
                 <f:if condition="{eventDate.priceCategorized}">
-                    <f:for each="{eventDate.priceCategories}" as="priceCategory">
-                        <cartevents:form.priceCategorySelect
-                                class="price-category-select form-control"
-                                name="tx_cart_cart[priceCategory]"
-                                eventDate="{eventDate}"
-                                blank="{f:translate(key: 'tx_cartevents.price_category_select.choose')}" />
-                    </f:for>
+                    <!-- Debug removed: priceCategories are now fetched via fallback in controller if missing -->
+                    <cart:variable.set name="firstAvailablePriceCategory" value="{eventDate.firstAvailablePriceCategory.uid}" />
+                    <select name="tx_cart_cart[priceCategory]" class="price-category-select form-control">
+                        <option value="">{f:translate(key: 'tx_cartevents.price_category_select.choose')}</option>
+                        <f:for each="{eventDate.priceCategories}" as="priceCategory">
+                            <f:if condition="{priceCategory.available}">
+                                <option value="{priceCategory.uid}"
+                                    data-regular-price="{priceCategory.price}"
+                                    <f:if condition="{priceCategory.bestPrice} &lt; {priceCategory.price}">
+                                        data-special-price="{priceCategory.bestPrice}"
+                                    </f:if>
+                                    data-title="{priceCategory.title}"
+                                    <f:if condition="{priceCategory.available} == false && {eventDate.handleSeatsInPriceCategory}">disabled</f:if>
+                                    <f:if condition="{cart:variable.get(name:'firstAvailablePriceCategory')} == {priceCategory.uid}">selected</f:if>
+                                >
+                                    {priceCategory.title} — <cart:format.currency currencyTranslation="{currencyTranslationData.currencyTranslation}" currencySign="{currencyTranslationData.currencySign}">{priceCategory.bestPrice}</cart:format.currency>
+                                </option>
+                            </f:if>
+                        </f:for>
+                    </select>
                 </f:if>
                 <input type="submit" class="btn btn-default" value="<f:translate key='tx_cartevents.plugin.form.submit' />">
             </f:then>

@@ -68,6 +68,15 @@ class EventDate extends AbstractEventDate
     #[Cascade(['value' => 'remove'])]
     protected ObjectStorage $calendarEntries;
 
+    public function __construct()
+    {
+        $this->images = new ObjectStorage();
+        $this->files = new ObjectStorage();
+        $this->specialPrices = new ObjectStorage();
+        $this->priceCategories = new ObjectStorage();
+        $this->calendarEntries = new ObjectStorage();
+    }
+
     public function getSku(): string
     {
         return $this->sku;
@@ -111,8 +120,11 @@ class EventDate extends AbstractEventDate
     /**
      * @return ObjectStorage<FileReference>
      */
-    public function getImages(): ?ObjectStorage
+    public function getImages(): ObjectStorage
     {
+        if (!isset($this->images)) {
+            $this->images = new ObjectStorage();
+        }
         return $this->images;
     }
 
@@ -133,8 +145,11 @@ class EventDate extends AbstractEventDate
     /**
      * @return ObjectStorage<FileReference>
      */
-    public function getFiles(): ?ObjectStorage
+    public function getFiles(): ObjectStorage
     {
+        if (!isset($this->files)) {
+            $this->files = new ObjectStorage();
+        }
         return $this->files;
     }
 
@@ -166,19 +181,22 @@ class EventDate extends AbstractEventDate
     /**
      * @return ObjectStorage<SpecialPrice>
      */
-    public function getSpecialPrices(): ?ObjectStorage
+    public function getSpecialPrices(): ObjectStorage
     {
+        if (!isset($this->specialPrices)) {
+            $this->specialPrices = new ObjectStorage();
+        }
         return $this->specialPrices;
     }
 
     public function addSpecialPrice(SpecialPrice $specialPrice): void
     {
-        $this->specialPrices->attach($specialPrice);
+        $this->getSpecialPrices()->attach($specialPrice);
     }
 
     public function removeSpecialPrice(SpecialPrice $specialPrice): void
     {
-        $this->specialPrices->detach($specialPrice);
+        $this->getSpecialPrices()->detach($specialPrice);
     }
 
     public function setSpecialPrices(ObjectStorage $specialPrices): void
@@ -198,6 +216,9 @@ class EventDate extends AbstractEventDate
 
     public function getPriceCategories(): ?ObjectStorage
     {
+        if (!isset($this->priceCategories)) {
+            $this->priceCategories = new ObjectStorage();
+        }
         return $this->priceCategories;
     }
 
@@ -214,12 +235,12 @@ class EventDate extends AbstractEventDate
 
     public function addPriceCategory(PriceCategory $priceCategory): void
     {
-        $this->priceCategories->attach($priceCategory);
+        $this->getPriceCategories()->attach($priceCategory);
     }
 
     public function removePriceCategory(PriceCategory $priceCategory): void
     {
-        $this->priceCategories->detach($priceCategory);
+        $this->getPriceCategories()->detach($priceCategory);
     }
 
     public function setPriceCategories(ObjectStorage $priceCategories): void
@@ -231,14 +252,12 @@ class EventDate extends AbstractEventDate
     {
         $bestSpecialPrice = null;
 
-        if ($this->specialPrices) {
-            foreach ($this->specialPrices as $specialPrice) {
-                if (!isset($bestSpecialPrice) || $specialPrice->getPrice() < $bestSpecialPrice->getPrice()) {
-                    if (!$specialPrice->getFrontendUserGroup() ||
-                        in_array($specialPrice->getFrontendUserGroup()->getUid(), $frontendUserGroupIds)
-                    ) {
-                        $bestSpecialPrice = $specialPrice;
-                    }
+        foreach ($this->getSpecialPrices() as $specialPrice) {
+            if (!isset($bestSpecialPrice) || $specialPrice->getPrice() < $bestSpecialPrice->getPrice()) {
+                if (!$specialPrice->getFrontendUserGroup() ||
+                    in_array($specialPrice->getFrontendUserGroup()->getUid(), $frontendUserGroupIds)
+                ) {
+                    $bestSpecialPrice = $specialPrice;
                 }
             }
         }
@@ -262,6 +281,9 @@ class EventDate extends AbstractEventDate
     public function getCalendarEntries(): ?ObjectStorage
     {
         $sortedCalendarEntries = new ObjectStorage();
+        if (!isset($this->calendarEntries)) {
+            $this->calendarEntries = new ObjectStorage();
+        }
         $calendarEntryArr = $this->calendarEntries->toArray();
 
         usort($calendarEntryArr, function ($calendarEntry1, $calendarEntry2) {

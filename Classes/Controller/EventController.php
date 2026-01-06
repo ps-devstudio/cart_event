@@ -100,6 +100,23 @@ class EventController extends ActionController
 
     public function showAction(?Event $event = null): ResponseInterface
     {
+        // Debugging: log incoming request arguments to help trace why event is not loaded
+        try {
+            \TYPO3\CMS\Core\Utility\GeneralUtility::sysLog('showAction args: ' . json_encode($this->request->getArguments()), 'cart_events', 0);
+            \TYPO3\CMS\Core\Utility\GeneralUtility::sysLog('page uid: ' . (int)$GLOBALS['TSFE']->id . ' doktype: ' . (int)$GLOBALS['TSFE']->page['doktype'], 'cart_events', 0);
+        } catch (\Throwable $e) {
+            // ignore logging errors
+        }
+        // If Extbase didn't map the incoming event UID to an Event object,
+        // try to load it from the request arguments (numeric UID) so links
+        // that pass only the UID still work.
+        if (!$event && $this->request->hasArgument('event')) {
+            $eventArg = $this->request->getArgument('event');
+            if (is_numeric($eventArg)) {
+                $event = $this->eventRepository->findByUid((int)$eventArg);
+            }
+        }
+
         if ((int)$GLOBALS['TSFE']->page['doktype'] === 186) {
             $eventUid = (int)$GLOBALS['TSFE']->page['cart_events_event'];
             $event = $this->eventRepository->findByUid($eventUid);
@@ -109,6 +126,27 @@ class EventController extends ActionController
         $this->view->assign('cartSettings', $this->cartConfiguration);
 
         $this->assignCurrencyTranslationData();
+        // Fallback: Ensure priceCategories are loaded even if storagePid rules hide them
+        if ($event && $event->getEventDates()) {
+            foreach ($event->getEventDates() as $eventDate) {
+                if ($eventDate->isPriceCategorized() && !$eventDate->getPriceCategories()->count()) {
+                    try {
+                        $priceCategoryRepository = GeneralUtility::makeInstance(
+                            \Extcode\CartEvents\Domain\Repository\PriceCategoryRepository::class
+                        );
+                        $categories = $priceCategoryRepository->findByEventDateUidIgnoreStorage((int)$eventDate->getUid());
+                        // Convert QueryResult to ObjectStorage
+                        $storage = new \TYPO3\CMS\Extbase\Persistence\ObjectStorage();
+                        foreach ($categories as $cat) {
+                            $storage->attach($cat);
+                        }
+                        $eventDate->setPriceCategories($storage);
+                    } catch (\Throwable $e) {
+                        // ignore fallback failure
+                    }
+                }
+            }
+        }
 
         $this->addCacheTags([$event]);
         return $this->htmlResponse();
@@ -303,7 +341,23 @@ class EventController extends ActionController
 
         if (!empty($GLOBALS['TSFE']) && is_object($GLOBALS['TSFE'])) {
             foreach ($events as $event) {
-                $cacheTags[] = 'tx_cartevents_event_' . $event->getUid();
+                if (!$event) {
+                    continue;
+                }
+
+                if (is_int($event)) {
+                    $cacheTags[] = 'tx_cartevents_event_' . $event;
+                    continue;
+                }
+
+                if (is_object($event) && method_exists($event, 'getUid')) {
+                    $cacheTags[] = 'tx_cartevents_event_' . $event->getUid();
+                    continue;
+                }
+                // If it's an array with 'event' key use that
+                if (is_array($event) && isset($event['event'])) {
+                    $cacheTags[] = 'tx_cartevents_event_' . (int)$event['event'];
+                }
             }
             if (count($cacheTags) > 0) {
                 $GLOBALS['TSFE']->addCacheTags($cacheTags);

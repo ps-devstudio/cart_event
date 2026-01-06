@@ -62,7 +62,28 @@ class EventDateController extends ActionController
 
         if (!empty($GLOBALS['TSFE']) && is_object($GLOBALS['TSFE'])) {
             foreach ($eventDates as $eventDate) {
-                $cacheTags[] = 'tx_cartevents_event_' . $eventDate['event'];
+                $eventId = null;
+
+                if (is_array($eventDate)) {
+                    if (isset($eventDate['event_uid'])) {
+                        $eventId = (int)$eventDate['event_uid'];
+                    } elseif (isset($eventDate['event'])) {
+                        $eventId = (int)$eventDate['event'];
+                    }
+                } elseif (is_object($eventDate)) {
+                    if (method_exists($eventDate, 'getEvent')) {
+                        $event = $eventDate->getEvent();
+                        if (is_object($event) && method_exists($event, 'getUid')) {
+                            $eventId = (int)$event->getUid();
+                        } elseif (is_int($event)) {
+                            $eventId = $event;
+                        }
+                    }
+                }
+
+                if ($eventId) {
+                    $cacheTags[] = 'tx_cartevents_event_' . $eventId;
+                }
             }
 
             if (count($cacheTags) > 0) {
