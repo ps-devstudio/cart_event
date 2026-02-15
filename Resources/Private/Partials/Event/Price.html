@@ -26,7 +26,7 @@
             <f:if condition="{priceCategory.available}">
                 <li class="price-category" data-uid="priceCategory-{priceCategory.uid}">
                     <span class="price-category-title">{priceCategory.title}</span>
-                    <f:if condition="{priceCategory.bestPrice} &lt; {priceCategory.price}">
+                    <f:if condition="{priceCategory.bestPrice} < {priceCategory.price}">
                         <f:then>
                             <span class="price-category-special"><cart:format.currency currencyTranslation="{currencyTranslationData.currencyTranslation}" currencySign="{currencyTranslationData.currencySign}">{priceCategory.bestPrice}</cart:format.currency></span>
                             <span class="price-category-regular">bisher: <cart:format.currency currencyTranslation="{currencyTranslationData.currencyTranslation}" currencySign="{currencyTranslationData.currencySign}">{priceCategory.price}</cart:format.currency></span>

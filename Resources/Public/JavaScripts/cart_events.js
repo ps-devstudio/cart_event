@@ -7,47 +7,70 @@ var cart_events = (function () {
         for (var addToCartFormsCount=0; addToCartFormsCount < addToCartForms.length; addToCartFormsCount++) {
             var priceCategorySelects = addToCartForms[addToCartFormsCount].querySelectorAll('.price-category-select');
             for (var priceCategorySelectCount=0; priceCategorySelectCount < priceCategorySelects.length; priceCategorySelectCount++) {
-
-                priceCategorySelects[priceCategorySelectCount].addEventListener('change', function(){ updatePriceCategory(this, eventDates[eventDateCount]) }, false);
+                (function(eventDate) {
+                    priceCategorySelects[priceCategorySelectCount].addEventListener('change', function(){ updatePriceCategory(this, eventDate) }, false);
+                })(eventDates[eventDateCount]);
             }
         }
     }
 
     function updatePriceCategory(element, eventDate) {
-        var price;
+        if (!element || !element.selectedOptions || !element.selectedOptions[0] || !eventDate) {
+            return;
+        }
 
-        var style = element.selectedOptions[0].style.display;
+        var selectedOption = element.selectedOptions[0];
+        var selectedValue = selectedOption.value;
+        var style = selectedOption.style.display;
+        var title = selectedOption.getAttribute('data-title');
+        var regularPrice = selectedOption.getAttribute('data-regular-price');
+        var specialPrice = selectedOption.getAttribute('data-special-price');
+
         eventDate.querySelectorAll('.event-date-price-category').forEach(el => {
             el.style.display = 'none';
         });
-        eventDate.querySelector('.event-date-price-category-' + element.selectedOptions[0].value).style.display = style;
-
-        var title = element.selectedOptions[0].getAttribute('data-title');
+        
+        var selectedButton = eventDate.querySelector('.event-date-price-category-' + selectedValue);
+        if (selectedButton) {
+            selectedButton.style.display = style;
+        }
 
         if (title) {
-            eventDate.querySelector('.event-date-price .regular-price').style.display = 'none';
-            eventDate.querySelector('.event-date-price .special-price').style.display = 'block';
+            var regularPriceEl = eventDate.querySelector('.event-date-price .regular-price');
+            if (regularPriceEl) regularPriceEl.style.display = 'none';
+            
+            var specialPriceEl = eventDate.querySelector('.event-date-price .special-price');
+            if (specialPriceEl) specialPriceEl.style.display = 'block';
 
-            eventDate.querySelector('.event-date-price .special-price .title').innerHTML = title;
+            var titleEl = eventDate.querySelector('.event-date-price .special-price .title');
+            if (titleEl) titleEl.innerHTML = title;
 
-            eventDate.querySelector('.event-date-price .regular-price .price').innerHTML = '';
+            var regularPricePriceEl = eventDate.querySelector('.event-date-price .regular-price .price');
+            if (regularPricePriceEl) regularPricePriceEl.innerHTML = '';
 
-            price = element.selectedOptions[0].getAttribute('data-regular-price');
-            eventDate.querySelector('.event-date-price .special-price .regular-price .price').innerHTML = price;
+            var specialPriceRegularPriceEl = eventDate.querySelector('.event-date-price .special-price .regular-price .price');
+            if (specialPriceRegularPriceEl) specialPriceRegularPriceEl.innerHTML = regularPrice;
 
-            price = element.selectedOptions[0].getAttribute('data-special-price');
-            eventDate.querySelector('.event-date-price .special-price .special-price .price').innerHTML = price;
+            var specialPriceSpecialPriceEl = eventDate.querySelector('.event-date-price .special-price .special-price .price');
+            if (specialPriceSpecialPriceEl) specialPriceSpecialPriceEl.innerHTML = specialPrice;
         } else {
-            eventDate.querySelector('.event-date-price .regular-price').style.display = 'block';
-            eventDate.querySelector('.event-date-price .special-price').style.display = 'none';
+            var regularPriceEl = eventDate.querySelector('.event-date-price .regular-price');
+            if (regularPriceEl) regularPriceEl.style.display = 'block';
+            
+            var specialPriceEl = eventDate.querySelector('.event-date-price .special-price');
+            if (specialPriceEl) specialPriceEl.style.display = 'none';
 
-            eventDate.querySelector('.event-date-price .special-price .title').innerHTML = '';
+            var titleEl = eventDate.querySelector('.event-date-price .special-price .title');
+            if (titleEl) titleEl.innerHTML = '';
 
-            price = element.selectedOptions[0].getAttribute('data-regular-price');
-            eventDate.querySelector('.event-date-price .regular-price .price').innerHTML = price;
+            var regularPricePriceEl = eventDate.querySelector('.event-date-price .regular-price .price');
+            if (regularPricePriceEl) regularPricePriceEl.innerHTML = regularPrice;
 
-            eventDate.querySelector('.event-date-price .special-price .regular-price .price').innerHTML = '';
-            eventDate.querySelector('.event-date-price .special-price .special-price .price').innerHTML = '';
+            var specialPriceRegularPriceEl = eventDate.querySelector('.event-date-price .special-price .regular-price .price');
+            if (specialPriceRegularPriceEl) specialPriceRegularPriceEl.innerHTML = '';
+            
+            var specialPriceSpecialPriceEl = eventDate.querySelector('.event-date-price .special-price .special-price .price');
+            if (specialPriceSpecialPriceEl) specialPriceSpecialPriceEl.innerHTML = '';
         }
     }
 

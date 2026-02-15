@@ -47,7 +47,10 @@ class DatamapDataHandlerHook
 
             $page = BackendUtility::getRecord('pages', abs($pageId));
 
-            if (!$this->isAllowedTargetPage($incomingFieldArray['list_type'], $page['doktype'])) {
+            $listType = $incomingFieldArray['list_type'] ?? '';
+            $doktype = $page['doktype'] ?? 0;
+
+            if (!$this->isAllowedTargetPage($listType, $doktype)) {
                 unset($dataHandler->datamap['tt_content'][$id]);
                 $dataHandler->log(
                     'tt_content',
@@ -58,10 +61,10 @@ class DatamapDataHandlerHook
                     'The record "%s" (list_type="%s") couldn\'t be saved on page uid %d (doktype %d) due to disallowed value(s).',
                     23,
                     [
-                        $incomingFieldArray[$GLOBALS['TCA']['tt_content']['ctrl']['label']],
-                        $incomingFieldArray['list_type'],
+                        $incomingFieldArray[$GLOBALS['TCA']['tt_content']['ctrl']['label']] ?? '',
+                        $listType,
                         $pageId,
-                        $page['doktype'],
+                        $doktype,
                     ]
                 );
             }
