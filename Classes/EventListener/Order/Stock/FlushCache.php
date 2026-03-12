@@ -29,6 +29,9 @@ class FlushCache
         foreach ($cartProducts as $cartProduct) {
             if ($cartProduct->getProductType() === 'CartEvents') {
                 $eventDate = $this->eventDateRepository->findByUid($cartProduct->getProductId());
+                if ($eventDate === null || $eventDate->getEvent() === null) {
+                    continue;
+                }
 
                 $cacheTag = 'tx_cartevents_event_' . $eventDate->getEvent()->getUid();
                 $cacheManager = GeneralUtility::makeInstance(CacheManager::class);

@@ -13,12 +13,22 @@ services:
         identifier: 'cart-events--order--stock--handle-stock'
         event: Extcode\Cart\Event\Order\StockEvent
 
+  Extcode\CartEvents\EventListener\Order\Stock\ReleaseStockOnPaypalCancel:
+    tags:
+      - name: event.listener
+        identifier: 'cart-events--order--stock--release-on-paypal-cancel'
+        event: Extcode\CartPaypal\Event\Order\CancelEvent
+
   Extcode\CartEvents\EventListener\Order\Stock\FlushCache:
     tags:
       - name: event.listener
         identifier: 'cart-events--order--stock--flush-cache'
         event: Extcode\Cart\Event\Order\StockEvent
         after: 'cart-events--order--stock--handle-stock'
+      - name: event.listener
+        identifier: 'cart-events--order--stock--flush-cache-on-paypal-cancel'
+        event: Extcode\CartPaypal\Event\Order\CancelEvent
+        after: 'cart-events--order--stock--release-on-paypal-cancel'
 
   Extcode\CartEvents\EventListener\RetrieveProductsFromRequest:
     tags:

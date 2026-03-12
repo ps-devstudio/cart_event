@@ -5,6 +5,7 @@ use Extcode\CartEvents\Controller\EventDateController;
 use Extcode\CartEvents\Domain\Finisher\Form\AddToCartFinisher;
 use Extcode\CartEvents\Hooks\DataHandler;
 use Extcode\CartEvents\Hooks\DatamapDataHandlerHook;
+use Extcode\CartEvents\Hooks\OrderDeleteDataHandlerHook;
 use Extcode\CartEvents\Updates\SlugUpdater;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use TYPO3\CMS\Extbase\Utility\ExtensionUtility;
@@ -85,6 +86,9 @@ $GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['cart']['CartEvents']['Form']['AddToCartF
 
 $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processDatamapClass']['cartevents_allowed'] =
     DatamapDataHandlerHook::class;
+
+$GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processCmdmapClass']['cartevents_order_delete_stock'] =
+    OrderDeleteDataHandlerHook::class;
 
 // clearCachePostProc Hook
 
